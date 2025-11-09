@@ -137,7 +137,7 @@ The **Chat with Data** feature enables non-technical users to query data using n
 <img width="1600" height="923" alt="image" src="https://github.com/user-attachments/assets/f57dcd34-c601-4ad1-9f8d-6f414400e16e" />
 
 - **AI Chat View**
-  <img width="1280" height="698" alt="image" src="https://github.com/user-attachments/assets/bf658732-81a0-4b30-9ed7-6fb30b24de83" />
+<img width="1280" height="698" alt="image" src="https://github.com/user-attachments/assets/bf658732-81a0-4b30-9ed7-6fb30b24de83" />
 
 
 
