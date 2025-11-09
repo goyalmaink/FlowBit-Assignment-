@@ -128,8 +128,10 @@ The **Chat with Data** feature enables non-technical users to query data using n
 ## 👤 Personal Space
 
 ### Deployment URLs
-- **Frontend (Vercel):** [Your Vercel URL here]  
-- **Database (Supabase):** [Your Database Host here]
+
+- **Frontend (Vercel):** https://flow-bit-assignment-iezk.vercel.app/
+- **Backend (Vercel):** https://flow-bit-assignment.vercel.app/
+- **Database (Supabase):** https://supabase.com/dashboard/project/gbafgywvftuyywfqyohg
 
 ### Screen Shots
 - **DashBoard View**
