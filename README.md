@@ -1,5 +1,6 @@
 # Flowbit Private Limited - Full Stack Developer Internship Assignment
 **Project Title: Transactional Analytics & AI Data Chat**
+
 **Submitted by: Mayank Goel**
 
 ## 🚀 Overview
