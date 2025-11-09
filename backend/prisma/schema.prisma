@@ -1,0 +1,188 @@
+// // This is your Prisma schema file,
+// // learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+// Maink.123456@
+
+// 1. MASTER DATA: Unique Vendors
+model Vendor {
+  id                String    @id @default(uuid())
+  vendorName        String    @unique // Unique index for lookup
+  vendorAddress     String?
+  vendorTaxId       String?
+  vendorPartyNumber String?
+
+  invoices          Invoice[] // 1:M relation to Invoices
+
+  @@map("vendors")
+}
+
+// 2. MASTER DATA: Unique Customers
+model Customer {
+  id              String    @id @default(uuid())
+  customerName    String    @unique // Non-nullable, Unique index for lookup
+  customerAddress String?
+  customerTaxId   String?
+
+  invoices        Invoice[] // 1:M relation to Invoices
+
+  @@map("customers")
+}
+
+// 3. CORE TRANSACTION: Consolidated Invoice Header
+model Invoice {
+  // Use documentId as the unique ID for this table as it links back to the source file 1:1
+  documentId         String    @id @unique 
+  
+  // Foreign Keys (FKs) for proper normalization
+  vendorId           String
+  customerId         String? // Nullable as some documents might miss customer info
+  
+  // Consolidated core invoice fields
+  invoiceNumber      String?
+  invoiceDate        DateTime
+  deliveryDate       DateTime?
+  documentType       String?
+  totalAmount        Float 
+  totalTax           Float?
+  subTotal           Float?
+  currency           String?
+
+  // Relationships
+  vendor             Vendor        @relation(fields: [vendorId], references: [id])
+  customer           Customer?     @relation(fields: [customerId], references: [id])
+
+  // 1:1 relation to Document (for file metadata)
+  document           Document      @relation(fields: [documentId], references: [id])
+  // 1:1 relation to Payment Detail
+  paymentDetail      PaymentDetail?
+  // 1:M relation to Line Items
+  lineItems          LineItem[]
+  
+  @@index([vendorId])
+  @@index([customerId])
+  @@index([invoiceDate])
+  @@index([documentType])
+  @@map("invoices")
+}
+
+
+// 4. TRANSACTION DETAIL: Line Items
+model LineItem {
+  id                String    @id @default(uuid())
+  invoiceDocumentId String  
+  line_number       Int?
+  description       String?
+  quantity          Float?
+  unitPrice         Float?
+  totalPrice        Float?
+  Sachkonto         String?
+  BUSchluessel      String?
+  vatRate           Float?
+  vatAmount         Float?
+  
+  invoice           Invoice   @relation(fields: [invoiceDocumentId], references: [documentId])
+
+  @@index([invoiceDocumentId])
+  @@map("line_items")
+}
+
+// 5. SUPPLEMENTAL DATA: Payment Terms (1:1 with Invoice via documentId)
+model PaymentDetail {
+  id                 String    @id @default(uuid())
+  invoiceDocumentId  String    @unique
+  
+  dueDate            DateTime?
+  paymentTerms       String?
+  bankAccountNumber  String?
+  BIC                String?
+  accountName        String?
+  netDays            Int?
+  discountPercentage Float?
+  discountDays       Int?
+  discountDueDate    DateTime?
+  discountedTotal    Float?
+  
+  invoice            Invoice   @relation(fields: [invoiceDocumentId], references: [documentId])
+
+  @@map("payment_details")
+}
+
+// 6. METADATA: Original Document (for file and system tracking)
+model Document {
+  id                 String    @id @unique // Document ID is kept as the source PK
+  name               String
+  filePath           String
+  fileType           String
+  fileSize           Float?
+  status             String
+  createdAt          DateTime
+  updatedAt          DateTime
+  processedAt        DateTime?
+  isValidatedByHuman Boolean   @default(false)
+  analyticsId        String?
+
+  organizationId String
+  departmentId   String
+  uploadedById   String
+
+  // 1:1 relation to the Invoice transaction table
+  invoice            Invoice?
+  
+  // 1:1 relation to audit/validation data
+  validatedData      ValidatedData? @relation("DocumentValidatedData")
+
+  // For completeness, although not used in normalized structure, we keep this relation if needed
+  metadata           DocumentMetadata? @relation("DocumentMetadata") 
+
+
+  @@index([organizationId])
+  @@index([departmentId])
+  @@map("documents")
+}
+
+// 7. AUDIT DATA: Validated Data/Status (1:1 with Document)
+model ValidatedData {
+  id                String   @id @default(uuid())
+  documentId        String   @unique 
+  lastValidatedAt   DateTime
+  validatedBy       String
+  status            String
+
+  document          Document @relation("DocumentValidatedData", fields: [documentId], references: [id])
+  
+  @@map("validated_data")
+}
+
+// 8. METADATA: Detailed Metadata block (1:1 with Document)
+model DocumentMetadata {
+    id              String    @id @default(uuid())
+    documentId        String    @unique
+    userId            String
+    organizationId    String
+    departmentId      String
+    templateId        String?
+    templateName      String?
+    title             String
+    description       String?
+    uploadedAt        DateTime
+    originalFileName  String
+    uploadedBy        String
+    aiResponseBaseUrl String?
+
+    document Document @relation("DocumentMetadata", fields: [documentId], references: [id])
+
+    @@map("document_metadata")
+}
