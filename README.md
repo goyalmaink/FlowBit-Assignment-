@@ -131,6 +131,17 @@ The **Chat with Data** feature enables non-technical users to query data using n
 - **Frontend (Vercel):** [Your Vercel URL here]  
 - **Database (Supabase):** [Your Database Host here]
 
+### Screen Shots
+- **DashBoard View**
+<img width="1280" height="696" alt="image" src="https://github.com/user-attachments/assets/7e3edf57-9560-41a6-b56a-a27cd48b36b4" />
+<img width="1600" height="923" alt="image" src="https://github.com/user-attachments/assets/f57dcd34-c601-4ad1-9f8d-6f414400e16e" />
+
+- **AI Chat View**
+  <img width="1280" height="698" alt="image" src="https://github.com/user-attachments/assets/bf658732-81a0-4b30-9ed7-6fb30b24de83" />
+
+
+
+
 ### Challenge Insight
 *The most challenging part was migrating the deeply nested JSON data into a normalized relational schema while preserving all extracted fields. Leveraging Prisma’s raw SQL capabilities with dynamic quoting was crucial for efficient aggregate query implementation.*
 
