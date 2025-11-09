@@ -64,3 +64,48 @@ npm run dev
 # Start the Frontend (Next.js)
 # (Navigate to your frontend start script/folder and run)
 npm run dev
+
+# Analytics Test Data - Database Schema
+
+This repository contains the fully normalized relational schema for the `Analytics_Test_Data.json` dataset. The normalization ensures:
+
+- **Referential integrity**  
+- **Data consistency**  
+- **Zero redundancy**  
+
+---
+
+## Schema Overview
+
+The data has been normalized across **7 core tables**, each serving a distinct role in the system.
+
+| Table Name        | Role                | Relationships                        | Rationale |
+|------------------|------------------|-------------------------------------|-----------|
+| `vendors`        | Master data       | 1:M with `invoices`                 | Stores unique vendor details such as name and tax ID. |
+| `customers`      | Master data       | 1:M with `invoices`                 | Stores unique customer details. |
+| `invoices`       | Transaction core  | 1:1 with `documents`, 1:M with `line_items` | Core invoice data including total amount, date, etc. |
+| `line_items`     | Transaction detail| M:1 with `invoices`                  | Stores item-level data for category analysis. |
+| `payment_details`| Supplemental      | 1:1 with `invoices`                  | Stores payment terms and due dates. |
+| `documents`      | File metadata     | 1:1 with `invoices`                  | Stores file metadata and status. |
+| `validated_data` | Audit trail       | 1:1 with `documents`                 | Tracks human validation and timestamps. |
+
+---
+
+## Table Relationships
+
+```bash
+# Master Tables
+vendors --< invoices >-- customers
+
+# Transaction Core
+invoices --< line_items
+
+# Supplemental Data
+invoices -- payment_details
+
+# File Metadata
+invoices -- documents
+
+# Audit Trail
+documents -- validated_data
+
