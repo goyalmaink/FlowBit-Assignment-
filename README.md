@@ -64,48 +64,83 @@ npm run dev
 # Start the Frontend (Next.js)
 # (Navigate to your frontend start script/folder and run)
 npm run dev
+---
+```
 
-# Analytics Test Data - Database Schema
 
-This repository contains the fully normalized relational schema for the `Analytics_Test_Data.json` dataset. The normalization ensures:
+### 🏛️ Database Schema and Normalization
 
-- **Referential integrity**  
-- **Data consistency**  
-- **Zero redundancy**  
+The raw `Analytics_Test_Data.json` (nested document structure) was meticulously normalized into a production-grade relational schema across **7 tables**, ensuring referential integrity and preventing redundancy.
+
+| Table Name | Role | Relationship | Rationale |
+|-------------|------|--------------|------------|
+| vendors | Master Data | 1:M with invoices | Stores unique vendor details (name, tax ID). |
+| customers | Master Data | 1:M with invoices | Stores unique customer details. |
+| invoices | Transaction Core | 1:1 with documents, 1:M with line_items | Consolidates invoice and summary blocks. |
+| line_items | Transaction Detail | M:1 with invoices | Stores itemized lines for category analysis (Sachkonto). |
+| payment_details | Supplemental Data | 1:1 with invoices | Stores due dates and bank information for cash flow forecasting. |
+| documents | File Metadata | 1:1 with invoices | Stores original file metadata and file status. |
+| validated_data | Audit Trail | 1:1 with documents | Stores human validation and audit timestamps. |
 
 ---
 
-## Schema Overview
+## 💻 Backend API Endpoints (Node.js / Prisma)
 
-The data has been normalized across **7 core tables**, each serving a distinct role in the system.
+All endpoints are built using Express/TypeScript and Prisma ORM to execute queries against the normalized PostgreSQL schema.
 
-| Table Name        | Role                | Relationships                        | Rationale |
-|------------------|------------------|-------------------------------------|-----------|
-| `vendors`        | Master data       | 1:M with `invoices`                 | Stores unique vendor details such as name and tax ID. |
-| `customers`      | Master data       | 1:M with `invoices`                 | Stores unique customer details. |
-| `invoices`       | Transaction core  | 1:1 with `documents`, 1:M with `line_items` | Core invoice data including total amount, date, etc. |
-| `line_items`     | Transaction detail| M:1 with `invoices`                  | Stores item-level data for category analysis. |
-| `payment_details`| Supplemental      | 1:1 with `invoices`                  | Stores payment terms and due dates. |
-| `documents`      | File metadata     | 1:1 with `invoices`                  | Stores file metadata and status. |
-| `validated_data` | Audit trail       | 1:1 with `documents`                 | Tracks human validation and timestamps. |
+| Endpoint | Method | Description | Key Tables Used |
+|-----------|--------|-------------|----------------|
+| `/stats` | GET | Returns aggregated metrics (Spend YTD, Total Invoices, etc.) | invoices, documents |
+| `/invoice-trends` | GET | Provides monthly count and value trend | invoices |
+| `/vendors/top10` | GET | Returns top 10 vendors by total spend | invoices, vendors |
+| `/category-spend` | GET | Calculates total spend by category (Sachkonto/BUSchluessel) | line_items |
+| `/cash-outflow` | GET | Forecasts cash obligations (due dates) | invoices, payment_details |
+| `/invoices` | GET | Paginated, searchable invoice list | invoices, vendors, payment_details |
+| `/chat-with-data` | POST | AI endpoint: NL query → SQL → results | all tables |
 
 ---
 
-## Table Relationships
+## 🤖 AI Integration: Chat with Data Workflow
 
-```bash
-# Master Tables
-vendors --< invoices >-- customers
+The **Chat with Data** feature enables non-technical users to query data using natural language.
 
-# Transaction Core
-invoices --< line_items
+**Workflow:**
+1. **Frontend (Next.js)** sends the user’s question to `/chat-with-data`.
+2. **Backend (Node.js/TypeScript)**:
+   - Constructs a system prompt describing the database schema and syntax conventions.
+   - Sends this prompt and the user query to **Groq**.
+3. **Groq LLM** generates an optimized PostgreSQL `SELECT` statement.
+4. **Backend** safely executes the query using `prisma.$queryRawUnsafe()`.
+5. **Frontend** receives both SQL and results, rendering them in a responsive table.
 
-# Supplemental Data
-invoices -- payment_details
+---
 
-# File Metadata
-invoices -- documents
+## 🌟 Bonus & Improvements Implemented
 
-# Audit Trail
-documents -- validated_data
+- **Production-Grade UI:** Built with TailwindCSS and shadcn/ui for a clean, modern, and fully responsive design.  
+- **Dynamic Status Calculation:** Invoice status (Overdue, Due, Processed) is dynamically computed server-side using payment due dates.  
+- **Robust Data Seeding:** `prisma/seed.ts` handles nested JSON, nulls, and schema-aware type conversions.  
+- **Detailed Analytics Mapping:** Charts accurately represent category distribution using Sachkonto/BUSchluessel.
 
+---
+
+## 👤 Personal Space
+
+### Deployment URLs
+- **Frontend (Vercel):** [Your Vercel URL here]  
+- **Database (Supabase):** [Your Database Host here]
+
+### Challenge Insight
+*The most challenging part was migrating the deeply nested JSON data into a normalized relational schema while preserving all extracted fields. Leveraging Prisma’s raw SQL capabilities with dynamic quoting was crucial for efficient aggregate query implementation.*
+
+### Future Improvements
+- Add persistent **chat history** in Supabase  
+- Implement **user authentication and role-based access**  
+- Enhance data visualization with **drill-down charts**  
+- Introduce **query caching** for frequent analytics requests  
+
+---
+
+🧩 *End of README*
+
+ 
