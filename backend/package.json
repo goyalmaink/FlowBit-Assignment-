@@ -5,9 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev":"nodemon --watch . --ext ts,json --exec \"node --loader ts-node/esm index.ts\"",
-
-
+    "dev": "nodemon --watch . --ext ts,json --exec \"node --loader ts-node/esm index.ts\"",
     "seed": "node --loader ts-node/esm prisma/seed.ts"
   },
   "prisma": {
@@ -25,7 +23,7 @@
     "groq-sdk": "^0.34.0",
     "helmet": "^8.1.0",
     "morgan": "^1.10.1",
-    "next": "^16.0.1",
+    "next": "16.0.7",
     "nodemon": "^3.1.10",
     "prisma": "^6.19.0"
   },
